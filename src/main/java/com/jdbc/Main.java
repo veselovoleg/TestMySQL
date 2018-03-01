@@ -1,41 +1,42 @@
 package com.jdbc;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Main {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "123456";
     private static final String URL = "jdbc:mysql://localhost:3306/mysql";
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws SQLException {
+        DBProcessor db = new DBProcessor();
+        Connection conn = db.getConnection(URL, USERNAME, PASSWORD);
+        //String query = "select * from business.products where product_id = 6"; //Print only this choose
+        String query = "select * from business.products";
+        Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery(query);
 
-        try {
-            Driver driver = new com.mysql.jdbc.Driver();
-            DriverManager.registerDriver(driver);
-        } catch (SQLException ex) {
-            System.out.println("Error! Can't to register driver");
-            return;
+        while (resultSet.next()) { //return True, if you have next element
+            int id;
+            String name;
+            double price;
+            int shopID;
+
+            id = resultSet.getInt("product_id");
+            name = resultSet.getString("productname");
+            price = resultSet.getDouble("price");
+            shopID = resultSet.getInt("shop_id");
+            //Always close connection
+            Product product = new Product(id, name, price, shopID);
+            System.out.println(product);
         }
 
-        try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        Statement statement = connection.createStatement())     {
-            //We can add new data
-//            statement.execute("insert into business.products (productname, price, shop_id) values (\"Sousage\", 44,2 )");
-            //Change old data
-//            statement.executeUpdate("update business.products set productname = \"Snikers\" where product_id = 6");
-            //Add several new values
-//            statement.addBatch("insert into business.products (productname, price, shop_id) values (\"Ketchup\", 57,2 )");
-//            statement.addBatch("insert into business.products (productname, price, shop_id) values (\"Nuts\", 68,1 )");
-//            statement.addBatch("insert into business.products (productname, price, shop_id) values (\"Something\", 37,3 )");
-//            statement.executeBatch();
-//            statement.clearBatch();
-            //Return result
-//              statement.executeQuery("select * from business.products");
+        statement.close();
+        conn.close();
 
-            System.out.println("Successful!");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+
     }
 
 }
